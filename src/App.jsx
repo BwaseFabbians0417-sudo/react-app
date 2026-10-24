@@ -1,41 +1,47 @@
 import { useState } from 'react'
 import './App.css'
+import ContactForm from './form'
+import ContactSearch from './search'
+import Person from './person'
+import NotePad from './note'
+import Product from './components/product'
 
 function App() {
-  const [name, setName] = useState('')
-  const [number, setNumber] = useState('')
   const [search, setSearch] = useState('')
-  const [error, setError] = useState('')
+  const [editingContact, setEditingContact] = useState(null)
   const [person, setPerson] = useState([
     { id: 1, name: 'Jackson', number: '010 5628 5628 67' },
     { id: 2, name: 'Felix', number: '090 1244 678' },
   ])
 
-  function handleSubmit(event) {
-    event.preventDefault()
-    const cleanName = name.trim()
-    const cleanNumber = number.trim()
-
-    if (!cleanName || !cleanNumber) {
-      setError('Please enter both a name and a phone number.')
-      return
-    }
-
+  function handleAddContact({ name, number }) {
     setPerson((people) => [
       ...people,
       {
         id: people.reduce((highestId, person) => Math.max(highestId, person.id), 0) + 1,
-        name: cleanName,
-        number: cleanNumber,
+        name,
+        number,
       },
     ])
-    setName('')
-    setNumber('')
-    setError('')
   }
 
-  function handleDelete(id) {
+  function handleUpdateContact({ name, number }) {
+    if (!editingContact) return
+
+    setPerson((people) =>
+      people.map((contact) =>
+        contact.id === editingContact.id ? { ...contact, name, number } : contact,
+      ),
+    )
+    setEditingContact(null)
+  }
+
+  function handleDelete(id, contactName) {
+    const confirmed = window.confirm(`Are you sure you want to delete ${contactName}?`)
+    if (!confirmed) return
+
     setPerson((people) => people.filter((person) => person.id !== id))
+    if (editingContact?.id === id) setEditingContact(null)
   }
 
   const normalizedSearch = search.trim().toLowerCase()
@@ -46,7 +52,7 @@ function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a className="brand" href="/" aria-label="Contacts List home">
+        <a className="brand" href={import.meta.env.BASE_URL} aria-label="Contacts List home">
           <span className="brand-mark" aria-hidden="true">C</span>
           <span>Contacts List</span>
         </a>
@@ -70,38 +76,18 @@ function App() {
           <div className="panel-heading">
             <span className="heading-icon add-icon" aria-hidden="true">＋</span>
             <div>
-              <h2>Add someone</h2>
-              <p>Save a new person to your list.</p>
+              <h2>{editingContact ? 'Edit contact' : 'Add someone'}</h2>
+              <p>{editingContact ? 'Update their name or phone number.' : 'Save a new person to your list.'}</p>
             </div>
           </div>
 
-          <form className="contact-form" onSubmit={handleSubmit} noValidate>
-            <label htmlFor="name">Full name</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              placeholder="e.g. Alex Morgan"
-              autoComplete="name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-            />
-
-            <label htmlFor="number">Phone number</label>
-            <input
-              id="number"
-              name="number"
-              type="tel"
-              placeholder="e.g. +1 555 010 2030"
-              autoComplete="tel"
-              value={number}
-              onChange={(event) => setNumber(event.target.value)}
-            />
-            {error && <p className="form-error" role="alert">{error}</p>}
-            <button className="primary-button" type="submit">
-              <span aria-hidden="true">＋</span> Add contact
-            </button>
-          </form>
+          <ContactForm
+            key={editingContact?.id ?? 'new-contact'}
+            contactToEdit={editingContact}
+            onAddContact={handleAddContact}
+            onUpdateContact={handleUpdateContact}
+            onCancelEdit={() => setEditingContact(null)}
+          />
 
           <div className="privacy-note">
             <span aria-hidden="true">✦</span>
@@ -121,42 +107,17 @@ function App() {
             <span className="count-pill">{person.length}</span>
           </div>
 
-          <label className="search-box" htmlFor="search">
-            <span aria-hidden="true">⌕</span>
-            <input
-              id="search"
-              name="search"
-              type="search"
-              placeholder="Search name or number..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-            {search && (
-              <button className="clear-search" type="button" onClick={() => setSearch('')} aria-label="Clear search">
-                ×
-              </button>
-            )}
-          </label>
+          <ContactSearch search={search} onSearchChange={setSearch} />
 
           {personsToShow.length > 0 ? (
             <ul className="contact-list">
               {personsToShow.map((contact) => (
-                <li className="contact-row" key={contact.id}>
-                  <span className="avatar" aria-hidden="true">{contact.name.charAt(0).toUpperCase()}</span>
-                  <div className="contact-details">
-                    <strong>{contact.name}</strong>
-                    <a href={`tel:${contact.number.replace(/[^\d+]/g, '')}`}>{contact.number}</a>
-                  </div>
-                  <button
-                    className="delete-button"
-                    type="button"
-                    onClick={() => handleDelete(contact.id)}
-                    aria-label={`Delete ${contact.name}`}
-                    title={`Delete ${contact.name}`}
-                  >
-                    <span aria-hidden="true">×</span>
-                  </button>
-                </li>
+                <Person
+                  key={contact.id}
+                  contact={contact}
+                  onDelete={handleDelete}
+                  onEdit={setEditingContact}
+                />
               ))}
             </ul>
           ) : (
@@ -172,6 +133,8 @@ function App() {
           </p>
         </section>
       </section>
+      <Product />
+      <NotePad />
       <footer className="page-footer">Made for the people who matter.</footer>
     </main>
   )
