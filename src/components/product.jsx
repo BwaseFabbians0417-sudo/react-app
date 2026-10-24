@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import ProductList from './product-list';
 
-function Product() {
+function Product({ cart, cartCount, onAddToCart }) {
     const [products, setProducts] = useState([]);
     const [status, setStatus] = useState('loading');
 
@@ -37,7 +37,14 @@ function Product() {
             {status === 'error' && (
                 <p className="products-message" role="alert">Products could not be loaded. Please try again later.</p>
             )}
-            {status === 'success' && <ProductList products={products} />}
+            {status === 'success' && (
+                <ProductList
+                    products={products}
+                    cart={cart}
+                    cartCount={cartCount}
+                    onAddToCart={onAddToCart}
+                />
+            )}
         </section>
     );
 }
