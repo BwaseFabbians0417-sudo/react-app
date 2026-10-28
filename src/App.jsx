@@ -11,6 +11,7 @@ import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import AccountPage from './pages/AccountPage'
 import CartPage from './pages/CartPage'
+import LoadingImage from './components/loading img'
 
 function AppFallback({ cart, cartCount, onAddToCart }) {
   const { pathname } = useLocation()
@@ -251,26 +252,28 @@ function App() {
   ])
 
   return (
-    <div className="site-shell">
-      <header className="site-header">
-        <Link className="brand" to="/" aria-label="Good Finds home">
-          <span className="brand-mark" aria-hidden="true">G</span>
-          <span>Good Finds</span>
-        </Link>
-        <NavLinks cartCount={cartCount} />
-      </header>
-      <div className="route-content">{routes}</div>
-      <footer className="site-footer">
-        <Link className="footer-brand" to="/">Good Finds</Link>
-        <p>A thoughtful edit of everyday essentials.</p>
-        <nav className="site-footer-links" aria-label="Footer navigation">
-          <Link to="/products">Products</Link>
-          <Link to="/about">About</Link>
-          <Link to="/contacts">Contacts</Link>
-        </nav>
-        <small>&copy; {new Date().getFullYear()} Good Finds</small>
-      </footer>
-    </div>
+    <LoadingImage>
+      <div className="site-shell">
+        <header className="site-header">
+          <Link className="brand" to="/" aria-label="Good Finds home">
+            <span className="brand-mark" aria-hidden="true">G</span>
+            <span>Good Finds</span>
+          </Link>
+          <NavLinks cartCount={cartCount} />
+        </header>
+        <div className="route-content">{routes}</div>
+        <footer className="site-footer">
+          <Link className="footer-brand" to="/">Good Finds</Link>
+          <p>A thoughtful edit of everyday essentials.</p>
+          <nav className="site-footer-links" aria-label="Footer navigation">
+            <Link to="/products">Products</Link>
+            <Link to="/about">About</Link>
+            <Link to="/contacts">Contacts</Link>
+          </nav>
+          <small>&copy; {new Date().getFullYear()} Good Finds</small>
+        </footer>
+      </div>
+    </LoadingImage>
   )
 }
 

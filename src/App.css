@@ -1,3 +1,19 @@
+.loading-image-screen {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #050505;
+  pointer-events: none;
+}
+
+.loading-image-screen img {
+  display: block;
+  width: min(203px, 60vw);
+  height: auto;
+}
+
 .site-shell {
   display: flex;
   min-height: 100vh;
